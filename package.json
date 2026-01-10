@@ -1,0 +1,35 @@
+{
+  "name": "cordial",
+  "version": "0.0.1",
+  "description": "Schoolwork management Discord bot",
+  "main": "main.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.ts",
+    "build": "tsup src/index.ts --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jprili/cordial.git"
+  },
+  "keywords": [
+    "schoolwork",
+    "event",
+    "discord-bot"
+  ],
+  "author": "James Paolo Rili",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/jprili/cordial/issues"
+  },
+  "homepage": "https://github.com/jprili/cordial#readme",
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
