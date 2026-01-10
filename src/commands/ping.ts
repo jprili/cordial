@@ -3,8 +3,11 @@ import {
 } from "discord.js";
 
 export const data = new SlashCommandBuilder()
-    .setName("ping");
+    .setName("ping")
+    .setDescription("pong");
 
-export const execute = (interaction: CommandInteraction) => {
+export async function execute(
+    interaction: CommandInteraction
+) {
     return interaction.reply("Pong!");
 }
