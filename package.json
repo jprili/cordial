@@ -4,9 +4,9 @@
   "description": "Schoolwork management Discord bot",
   "main": "main.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.ts",
-    "build": "tsup src/index.ts --minify"
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup src/main.ts --minify"
   },
   "repository": {
     "type": "git",
