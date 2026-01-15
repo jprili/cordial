@@ -1,7 +1,7 @@
 import * as ping from "./ping";
-import * as getEvents from "./getEvents";
+import * as events from "./events";
 
 export const commands = {
     ping,
-    getEvents
+    events
 }
