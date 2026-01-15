@@ -15,6 +15,8 @@ export async function execute(
      let eventManager = new GuildScheduledEventManager(
          interaction.guild
      );
-    console.log(await eventManager.fetch());
-    return interaction.reply("received")
+    let events = await eventManager.fetch()
+    return interaction.reply(
+        `\`\`\`json\n${JSON.stringify(events, null , 2)}\`\`\``
+    )
 }
