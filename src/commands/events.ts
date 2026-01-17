@@ -1,8 +1,11 @@
 import {
     CommandInteraction,
-    SlashCommandBuilder,
-    GuildScheduledEventManager
+    SlashCommandBuilder
 } from "discord.js";
+
+import {
+    fetchDeadlines
+} from "../DeadlineManager";
 
 export const data = new SlashCommandBuilder()
     .setName("events")
@@ -11,11 +14,11 @@ export const data = new SlashCommandBuilder()
 export async function execute(
     interaction: CommandInteraction
 ) {
-    // @ts-ignore
-     let eventManager = new GuildScheduledEventManager(
-         interaction.guild
-     );
-    let events = await eventManager.fetch()
+    let events = await fetchDeadlines(interaction.guild);
+    console.log(events);
+    if (!events.length) {
+        return interaction.reply("No events set.");
+    }
     return interaction.reply(
         `\`\`\`json\n${JSON.stringify(events, null , 2)}\`\`\``
     )
