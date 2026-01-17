@@ -31,12 +31,12 @@ const buildReplyMessage = (deadlines: Array<Deadline>) => {
         )
     let replyMessage = "";
     for (const d of cleanDeadlines) {
-        const { courseFaculty, courseNumber, start, end } = d; 
+        const { courseFaculty, courseNumber, name, start, end } 
+            = d; 
         const unixSeconds = 
             Math.floor(new Date(start).getTime() / 1000);
         replyMessage += 
-            `* ${courseFaculty} ${courseNumber}: 
-               <description-placeholder>, 
+            `* ${courseFaculty} ${courseNumber}: ${name}, 
                <t:${unixSeconds}>\n`
     }
     return replyMessage;

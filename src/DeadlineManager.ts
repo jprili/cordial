@@ -29,6 +29,7 @@ export const fetchDeadlines =
     };
 
     // @ts-ignore
+    // eventManager *has* a public constructor.
     const eventManager = new GuildScheduledEventManager(
         guild
     );
@@ -41,11 +42,11 @@ export const fetchDeadlines =
             return create({
                 start: new Date(obj.scheduledStartTimestamp),
                 end:   new Date(obj.scheduledEndTimestamp),
+                name:  obj.name,
                 courseFaculty: course.faculty,
-                courseNumber: course.num
+                courseNumber:  course.num
             })
         }
     );
-        
 }
 
