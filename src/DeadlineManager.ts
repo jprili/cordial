@@ -18,7 +18,6 @@ const getFacultyAndNumberFromLocation =
             ?? "NULL 0000";
     const matches = location.match(/(\w{4})\s+(\d{4})/)
             ?.slice(1, 3) ?? ["NULL", "0000"];
-    console.log(matches);
     return createCourse(matches[0], parseInt(matches[1]))
 }
 
@@ -50,8 +49,3 @@ export const fetchDeadlines =
         
 }
 
-export const showDeadlines = async (guild: Guild) => {
-    // @ts-ignore
-    // Possible Undefined, but already handled by ??.
-    return await this.fetchDeadlines(guild) ?? [];
-}

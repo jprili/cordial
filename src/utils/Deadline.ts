@@ -1,6 +1,6 @@
 interface PartialDeadline {
-    courseFaculty: String; 
-    courseNumber:  Number; 
+    courseFaculty: string; 
+    courseNumber:  number; 
     start?:          Date;
     end?:            Date;
 }
