@@ -10,7 +10,7 @@ but managing them takes a lot of clicks and work.
 * `/events` - get all the upcoming deadlines.
 
 # TODO
-[  ] event scheduling.  
-    [  ] perhaps make the frequency configurable as well.  
-[  ] set end time to be the actual due date.  
-[  ] set class name pattern. currently the pattern is hardcoded.  
+- [  ] event scheduling.  
+    - [  ] perhaps make the frequency configurable as well.  
+- [  ] set end time to be the actual due date.  
+- [  ] set class name pattern. currently the pattern is hardcoded.  
