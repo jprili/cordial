@@ -1,7 +1,8 @@
-import {
+const {
     CommandInteraction,
-    SlashCommandBuilder
-} from "discord.js";
+    SlashCommandBuilder,
+    PermissionFlagsBits
+} = require("discord.js");
 
 import {
     fetchDeadlines
@@ -11,15 +12,23 @@ import {
     Deadline
 } from "../utils/Deadline"
 
+const SECOND_MS = 1000;
+const DAY_MS    = 24 * 60 * 60 * SECOND_MS;
+const DAYS      = 14;
+
 const buildReplyMessage = (deadlines: Array<Deadline>) => {
     const cleanDeadlines: Array<Deadline> = deadlines
         .filter((d) => d.courseNumber != 0)
+        .filter((d) => {
+            return (+d.end - Date.now() < 
+                (DAYS * DAY_MS))
+        })
         .sort(
             (a: Deadline, b: Deadline) => {
                 if (a.courseFaculty < b.courseFaculty) {
-                    return 1;
-                } else if  (a.courseFaculty > b.courseFaculty) {
                     return -1;
+                } else if  (a.courseFaculty > b.courseFaculty) {
+                    return 1;
                 } else if (a.courseNumber != b.courseNumber) {
                     return a.courseNumber - b.courseNumber;
                 } else if (a.start != b.start) {
@@ -29,12 +38,12 @@ const buildReplyMessage = (deadlines: Array<Deadline>) => {
                 }
             }
         )
-    let replyMessage = "";
+    let replyMessage = "Due work in the next two weeks:\n";
     for (const d of cleanDeadlines) {
         const { courseFaculty, courseNumber, name, start, end } 
             = d; 
         const unixSeconds = 
-            Math.floor(new Date(start).getTime() / 1000);
+            Math.floor(new Date(end).getTime() / SECOND_MS);
         replyMessage += 
             `* ${courseFaculty} ${courseNumber}: ${name}, 
                <t:${unixSeconds}>\n`
@@ -44,10 +53,13 @@ const buildReplyMessage = (deadlines: Array<Deadline>) => {
 
 export const data = new SlashCommandBuilder()
     .setName("events")
-    .setDescription("Obtain event info");
+    .setDescription("Obtain event info")
+    .setDefaultMemberPermissions(
+        PermissionFlagsBits.ManageEvents
+    );
 
 export async function execute(
-    interaction: CommandInteraction
+    interaction: typeof CommandInteraction
 ) {
     let events = await fetchDeadlines(interaction.guild);
     if (!events.length) {
