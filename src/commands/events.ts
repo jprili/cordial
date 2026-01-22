@@ -12,9 +12,9 @@ import {
     Deadline
 } from "../utils/Deadline"
 
-const MS     = 1000;
-const DAY_MS = 24 * 60 * 60 * MS;
-const DAYS   = 14;
+const SECOND_MS = 1000;
+const DAY_MS    = 24 * 60 * 60 * SECOND_MS;
+const DAYS      = 14;
 
 const buildReplyMessage = (deadlines: Array<Deadline>) => {
     const cleanDeadlines: Array<Deadline> = deadlines
@@ -43,7 +43,7 @@ const buildReplyMessage = (deadlines: Array<Deadline>) => {
         const { courseFaculty, courseNumber, name, start, end } 
             = d; 
         const unixSeconds = 
-            Math.floor(new Date(end).getTime() / MS);
+            Math.floor(new Date(end).getTime() / SECOND_MS);
         replyMessage += 
             `* ${courseFaculty} ${courseNumber}: ${name}, 
                <t:${unixSeconds}>\n`
