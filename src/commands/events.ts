@@ -25,17 +25,7 @@ const buildReplyMessage = (deadlines: Array<Deadline>) => {
         })
         .sort(
             (a: Deadline, b: Deadline) => {
-                if (a.courseFaculty < b.courseFaculty) {
-                    return -1;
-                } else if  (a.courseFaculty > b.courseFaculty) {
-                    return 1;
-                } else if (a.courseNumber != b.courseNumber) {
-                    return a.courseNumber - b.courseNumber;
-                } else if (a.start != b.start) {
-                    return +a.start - +b.start
-                } else {
-                    return +a.end - +b.end
-                }
+                return +a.end - +b.end
             }
         )
     let replyMessage = "Due work in the next two weeks:\n";
