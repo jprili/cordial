@@ -1,11 +1,15 @@
 import { 
     Client,
-    GatewayIntentBits
+    GatewayIntentBits,
+    Channel,
+    TextChannel,
+    CategoryChannel
 } from "discord.js";
 
 import { config } from "./config";
 import { commands } from "./commands";
 import { deployCommands } from "./deploy";
+import { notifyUsers } from "./onGuildEventUpdate"
 
 const client = new Client({
     intents: [
@@ -15,6 +19,17 @@ const client = new Client({
         GatewayIntentBits.GuildScheduledEvents
     ]
 })
+
+const findTextChannel = 
+    (client: Client, name: string): TextChannel => {
+
+    // @ts-ignore
+    return client.channels.cache
+        .find((channel: Channel) => 
+            !(channel instanceof CategoryChannel)
+            && (channel instanceof TextChannel)
+            && channel.name == name) ?? null;
+}
 
 client.once(
     "clientReady",
@@ -40,4 +55,16 @@ client.on(
     }
 )
 
+client.on(
+    "guildScheduledEventCreate",
+    async (newEvent) => {
+        const message: string = await notifyUsers(newEvent);
+        const channel: TextChannel = findTextChannel(
+            client,
+            "deadlines");
+        channel.send(message);
+    }
+)
+
 client.login(config.DISCORD_TOKEN);
+
