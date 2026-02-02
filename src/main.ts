@@ -9,7 +9,7 @@ import {
 import { config } from "./config";
 import { commands } from "./commands";
 import { deployCommands } from "./deploy";
-import { notifyUsers } from "./onGuildEventUpdate"
+import { notifyUsers } from "./onGuildEventCreate"
 
 const client = new Client({
     intents: [
