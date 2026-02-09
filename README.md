@@ -8,9 +8,9 @@ but managing them takes a lot of clicks and work.
 
 # Commands
 * `/events` - get all the upcoming deadlines.
-
-# TODO
-- [ ] event scheduling.  
-    - [ ] perhaps make the frequency configurable as well.  
-- [ ] set end time to be the actual due date.  
-- [ ] set class name pattern. currently the pattern is hardcoded.  
+* `/elo`
+    - `match <winner:user> <loser:user>`: adjust the `winner` and `loser`
+    stats.
+    - `leaderboard [<top:int>]`: show the `top` number of players.
+    - `stats <player:user>`: show the Elo rating, 
+    number of games played, and winrate of `player`.
