@@ -8,9 +8,7 @@ const {
 
 const {
     Player,
-    getMatch,
-    getLeaderboard,
-    getStats
+    handle
 } = require("utils/Player");
 
 /**
@@ -58,21 +56,10 @@ export const data = new SlashCommandBuilder()
         )
     );
 
-/**
- * Function map 
- */
-const functions: { [k: string]: any } = {
-    "match": getMatch,
-    "leaderboard": getLeaderboard,
-    "stats": getStats
-};
 
 export async function execute(
     interaction: typeof CommandInteraction
 ) {
-    const handler = functions[
-        interaction.options.getSubcommand()
-    ];
-    return interaction.reply(await handler(interaction));
+    return interaction.reply(await handle(interaction));
 }
 
