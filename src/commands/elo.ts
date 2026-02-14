@@ -3,13 +3,14 @@ const {
     SlashCommandBuilder,
     SlashCommandSubcommandBuilder,
     SlashCommandIntegerOption,
-    SlashCommandUserOption
+    SlashCommandUserOption,
+    Embed
 } = require("discord.js");
 
 const {
     Player,
     handle
-} = require("utils/Player");
+} = require("../utils/Player");
 
 /**
  * Build the slash-command for the Elo
@@ -60,6 +61,24 @@ export const data = new SlashCommandBuilder()
 export async function execute(
     interaction: typeof CommandInteraction
 ) {
-    return interaction.reply(await handle(interaction));
+
+    let result: string | typeof Embed;
+    let ephemeral: boolean = false;
+    try {
+        result = await handle(interaction);
+    } catch (e) {
+        if (e instanceof Error) {
+            result = e.message;
+            ephemeral = !ephemeral;
+        }
+    }
+
+    switch (typeof result) {
+        case "string":
+            return interaction.reply({ content: result, ephemeral: ephemeral });
+        default:
+            return interaction.reply({ embeds: [result] });
+    }
+
 }
 

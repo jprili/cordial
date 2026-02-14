@@ -119,13 +119,15 @@ export const embedFromStat =
 const parseMatch = (stdout: string) => {
     const matches = 
         stdout.match(
-        /(<@\d+>) \(\d+\) beat (<@\d+>) \(\d+\) \[shift: (\d+)\]/
+    /(<@\d+>) \((\d+)\) beat (<@\d+>) \((\d+)\) \[shift: (\d+)\]/
         ) ?? [];
+
+    console.log(matches)
 
     return {
         winPlayer:  matches[1],
-        lossPlayer: matches[2],
-        winElo:     parseInt(matches[3]),
+        winElo:     parseInt(matches[2]),
+        lossPlayer: matches[3],
         lossElo:    parseInt(matches[4]),
         shift:      parseInt(matches[5])
     }
@@ -139,39 +141,46 @@ export const setMatch =
         const winner = interaction.options.getUser("winner");
         const loser  = interaction.options.getUser("loser");
         if (winner == loser) {
-            throw {
-                message: "winner and loser must be different",
-                error: new Error()
-            }
+            throw new Error(
+                "Winner and loser must be different users.\n"
+                + `Found <@${winner.id}>.`
+            )
         }
         const { stdout } = await execFile(ELO_EXEC, 
             ["match", STATS_FILE_NAME, winner, loser]);
 
-        const { winElo, lossElo, shift } = parseMatch(stdout);
+        const { winPlayer, lossPlayer, winElo, lossElo, shift } 
+            = parseMatch(stdout);
         return {
-        color: 0x4bb543,
-        title: "Match result",
-        description: "Match result recorded.",
-        fields: [
-            {
-                name: "W",
-                value: winner
-            },
-            {
-                name: "new elo",
-                value: `${winElo} (${shift})`,
-                inline: true
-            },
-            {
-                name: "L",
-                value: loser
-            },
-            {
-                name: "new elo",
-                value: `${winElo} (${-shift})`,
-                inline: true
-            },
-        ],
+            color: 0x4bb543,
+            title: "Match result",
+            description: "Match result recorded.",
+            fields: [
+                {
+                    name: "W",
+                    value: winPlayer,
+                    inline: true
+                },
+                {
+                    name: "rating",
+                    value: `${winElo} (+${shift})`,
+                    inline: true
+                },
+                {
+                    name: "\t",
+                    value: "\t"
+                },
+                {
+                    name: "L",
+                    value: lossPlayer,
+                    inline: true
+                },
+                {
+                    name: "rating",
+                    value: `${winElo} (${-shift})`,
+                    inline: true
+                },
+            ],
             timestamp: new Date().toISOString()
     };
 }
@@ -213,5 +222,7 @@ const functions: { [k: string]: any } = {
  */
 export const handle = (interaction: typeof CommandInteraction):
     string | typeof Embed => {
-    return functions[interaction.getSubcommand()](interaction);
+        return functions[
+            interaction.options.getSubcommand()
+        ](interaction);
 }
