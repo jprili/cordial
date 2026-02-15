@@ -6,7 +6,9 @@ const {
     Embed,
     EmbedBuilder,
     User,
-    CommandInteraction
+    CommandInteraction,
+    Guild,
+    GuildMember
 } = require("discord.js");
 
 const STATS_FILE_NAME = "src/ocaml/stats.txt";
@@ -203,13 +205,62 @@ const callLeaderboard = async () => {
     return stdout;
 }
 
+const getUserInGuild = 
+    async (
+        guild: typeof Guild, 
+        userID: string
+    ) => {
+    return (await guild.members.fetch(userID)).user;
+}
+
+const buildLine = 
+    (guild: typeof Guild) => 
+    async (p: Player, i: number) => {
+        const result = (await getUserInGuild(guild, 
+            p.userID.replace(/<@(\d+)>/, "$1"))).username;
+        return `${i+1}.\t${result}\t${p.rating}\t`
+            +`${p.numPlays}\t`
+            +`${p.numWins}\n`
+}
+
+/*
+ * Clamp `n` into a number between `min` and `max`.
+ */
+const clamp = (n: number, min: number, max: number) => {
+    return Math.min(Math.max(n, min), max)
+}
+
 /**
  * Handle the leaderboard logic.
  */
 export const getLeaderboard = 
     async (interaction: typeof CommandInteraction) => {
-        const { stdout } = await callLeaderboard();
-        return stdout;
+        const guild = interaction.guild;
+        const topN: number = interaction
+            .options
+            .getInteger("top") ?? 10;
+        const leaderboard: Player[] = 
+            parseLeaderboard(await callLeaderboard());
+        const initial = 
+            "```\nplace\tplayer\trating\tgames played\twins\n";
+        const lines = await Promise.all(
+            leaderboard
+            .slice(0, clamp(topN, 0, leaderboard.length))
+            .map(buildLine(guild))
+        );
+        const description = lines.reduce(
+            (a: string, current: string) =>
+            a + current, initial
+        )
+        return {
+            color: 0x4bb543, 
+            title: "Leaderboard",
+            author: {
+                name: "cordial-bot"
+            },
+            description: description + "```",
+            timestamp: new Date().toISOString(),
+        };
 };
 
 /**
@@ -228,7 +279,7 @@ export const getStats =
         if (!leaderboard.find((p: Player) => 
                 p.userID == player.userID)) {
             throw new Error(
-                `${user.username} is not in the leaderboard.`
+                `${user.username} is not in the records.`
             )
         }
         return embedFromStat(
