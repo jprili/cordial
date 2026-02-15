@@ -1,17 +1,16 @@
-const util = require("node:util");
-const execFile = 
-    util.promisify(require("node:child_process").execFile);
-
 const {
     CommandInteraction, 
     SlashCommandBuilder,
     SlashCommandSubcommandBuilder,
     SlashCommandIntegerOption,
-    SlashCommandUserOption
-}  = require("discord.js");
+    SlashCommandUserOption,
+    Embed
+} = require("discord.js");
 
-const STATS_FILE_NAME = "src/ocaml/stats.txt";
-const ELO_EXEC = "src/ocaml/elo"
+const {
+    Player,
+    handle
+} = require("../utils/Player");
 
 /**
  * Build the slash-command for the Elo
@@ -58,62 +57,28 @@ export const data = new SlashCommandBuilder()
         )
     );
 
-/**
- * Handle the addition logic.
- */
-const handleMatch = 
-    async (interaction: typeof CommandInteraction) => {
-        const winner: String = 
-            interaction.options.getUser("winner");
-        const  loser: String = 
-            interaction.options.getUser("loser");
-        if (winner == loser) {
-            return "winner and loser must be different users"
-        }
-        const { stdout } = await execFile(ELO_EXEC, 
-            ["match", STATS_FILE_NAME, winner, loser]);
-        return stdout;
-};
-
-/**
- * Handle the leaderboard logic.
- */
-const handleLeaderboard = 
-    async (interaction: typeof CommandInteraction) => {
-        const n: number = 
-            interaction.options.getInteger("top") ?? 10;
-        const { stdout } = await execFile(ELO_EXEC, 
-            ["leaderboard", STATS_FILE_NAME]);
-        return stdout;
-};
-
-/**
- * Handle the stat command
- */
-const handleStats = 
-    async (interaction: typeof CommandInteraction) => {
-        const player: String = 
-            interaction.options.getUser("player");
-        const { stdout } = await execFile(ELO_EXEC, 
-            ["stats", STATS_FILE_NAME, player]);
-        return stdout;
-};
-
-/**
- * Function map 
- */
-const functions: { [k: string]: any } = {
-    "match": handleMatch,
-    "leaderboard": handleLeaderboard,
-    "stats": handleStats
-};
 
 export async function execute(
     interaction: typeof CommandInteraction
 ) {
-    const handler = functions[
-        interaction.options.getSubcommand()
-    ];
-    return interaction.reply(await handler(interaction));
+
+    let result: string | typeof Embed;
+    let ephemeral: boolean = false;
+    try {
+        result = await handle(interaction);
+    } catch (e) {
+        if (e instanceof Error) {
+            result = e.message;
+            ephemeral = !ephemeral;
+        }
+    }
+
+    switch (typeof result) {
+        case "string":
+            return interaction.reply({ content: result, ephemeral: ephemeral });
+        default:
+            return interaction.reply({ embeds: [result] });
+    }
+
 }
 
