@@ -35,8 +35,6 @@ enum RankingColor {
     Coal   = 0x000000
 }
 
-
-
 /**
  * Parses the string into a Player object.
  */
@@ -57,40 +55,55 @@ export const playerFromString = (stdout: string): Player => {
 }
 
 export const parseLeaderboard = (stdout: string): Player[] => {
-    return stdout.split("\n").map(
-        (line: string) => 
-            playerFromString(line.replace(/^\d+\./, ""))
-    );
+    const lines = stdout.split("\n");
+    return lines
+        .slice(0, lines.length - 1)
+        .map(
+            (line: string) => 
+            playerFromString(line.replace(/^\d+\. /, ""))
+        );
 }
 
 const getRankingColour = (rank: number) => {
     switch (rank) {
-        case 1: return RankingColor.Gold
-        case 2: return RankingColor.Silver
-        case 3: return RankingColor.Bronze
+        case 0: return RankingColor.Gold
+        case 1: return RankingColor.Silver
+        case 2: return RankingColor.Bronze
         default: 
             return RankingColor.Coal
     }
 }
 
-const getNameFromUserID = (player: Player): string => {
-    // TODO
-    return ""
+/*
+ * Obtains the user's avatar url.
+ */
+const getAvatarURL = (user: typeof User): string => {
+    const baseURL: string = "https://cdn.discordapp.com"
+    const path: string = `/avatars/${user.id}`;
+    const result = baseURL + path + `/${user.avatar}.webp`;
+    return result
 }
 
-export const embedFromStat = 
-    (player: Player, leaderboard: Player[]) => {
-        const playerRanking: number = leaderboard.map(
+export const embedFromStat = (
+    user: typeof User, 
+    player: Player, 
+    leaderboard: Player[]
+) => {
+    const playerRanking: number = leaderboard.map(
             _player => _player.userID
         ).indexOf(player.userID);
+    const displayName: string = user.globalName ?? user.username
     return {
         color: getRankingColour(playerRanking),
-        title: "",
+        title: 
+            displayName
+            +`${displayName?.endsWith("s") ? "'" : "'s"} ` 
+            +"Player Card",
         author: {
-            name: "Player Card"
+            name: "cordial-bot"
         },
         thumbnail: {
-            url: "https://picsum.photos/200/200"
+            url: getAvatarURL(user)
         },
         fields: [
             {
@@ -110,7 +123,8 @@ export const embedFromStat =
             },
             {
               name: "Winrate",
-              value: player.numWins / player.numPlays
+              value: (player.numWins / player.numPlays)
+                     .toFixed(2).toString()
             }
         ]
     }
@@ -121,9 +135,6 @@ const parseMatch = (stdout: string) => {
         stdout.match(
     /(<@\d+>) \((\d+)\) beat (<@\d+>) \((\d+)\) \[shift: (\d+)\]/
         ) ?? [];
-
-    console.log(matches)
-
     return {
         winPlayer:  matches[1],
         winElo:     parseInt(matches[2]),
@@ -185,24 +196,46 @@ export const setMatch =
     };
 }
 
+const callLeaderboard = async () => {
+    const { stdout } = await execFile(
+        ELO_EXEC, ["leaderboard", STATS_FILE_NAME]
+    )
+    return stdout;
+}
+
 /**
  * Handle the leaderboard logic.
  */
 export const getLeaderboard = 
-    async (n: number = 10) => {
-        const { stdout } = await execFile(ELO_EXEC, 
-            ["leaderboard", STATS_FILE_NAME]);
+    async (interaction: typeof CommandInteraction) => {
+        const { stdout } = await callLeaderboard();
         return stdout;
 };
 
 /**
- * Handle the stat command
+ * Handle the stat command.
  */
 export const getStats = 
-    async (playerName: string) => {
-        const { stdout } = await execFile(ELO_EXEC, 
-            ["stats", STATS_FILE_NAME, playerName]);
-        return stdout;
+    async (interaction: typeof CommandInteraction) => {
+        const user: typeof User = 
+            interaction.options.getUser("player"); 
+        const player = playerFromString((await 
+                execFile(ELO_EXEC, ["stats", STATS_FILE_NAME, user])
+            ).stdout);
+        const leaderboard = parseLeaderboard(
+            await callLeaderboard());
+
+        if (!leaderboard.find((p: Player) => 
+                p.userID == player.userID)) {
+            throw new Error(
+                `${user.username} is not in the leaderboard.`
+            )
+        }
+        return embedFromStat(
+            user,
+            player,
+            leaderboard
+        )
 };
 
 /**
