@@ -242,7 +242,7 @@ export const getLeaderboard =
         const leaderboard: Player[] = 
             parseLeaderboard(await callLeaderboard());
         const initial = 
-            "```\nplace\tplayer\trating\tgames played\twins\n";
+            "```\nplace\tplayer\trating\t #played\twins\n";
         const lines = await Promise.all(
             leaderboard
             .slice(0, clamp(topN, 0, leaderboard.length))
